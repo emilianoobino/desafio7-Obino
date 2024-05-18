@@ -34,7 +34,7 @@ router.post("/login", passport.authenticate("login", {
 
 
 router.get("/faillogin", async (req, res) => {
-    res.send("Fallo todo, vamos a morir");
+    res.send("Fallo todo");
 })
 
 //VERSION PARA GITHUB: 

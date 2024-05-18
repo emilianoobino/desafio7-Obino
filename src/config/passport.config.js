@@ -1,26 +1,25 @@
-//Importamos los módulos: 
 import passport from "passport";
 import local from "passport-local";
-
-//Estrategia con GitHub:
 import GitHubStrategy from "passport-github2";
-
-//Traemos el UsuarioModel y las funciones de bcryp: 
 import UsuarioModel from "../models/usuario.model.js";
 import { createHash, isValidPassword } from "../utils/hashbcrypt.js";
+import CartManager from "../controllers/cart-manager-db.js";
+const cartManager = new CartManager();
 
 
 const LocalStrategy = local.Strategy;
 
 const initializePassport = () => {
-    //Vamos a armar nuestras estrategias: Registro y Login. 
+    
+    //Registro y Login. 
 
     passport.use("register", new LocalStrategy({
-        //Le digo que quiero acceder al objeto request
         passReqToCallback: true,
         usernameField: "email"
     }, async (req, username, password, done) => {
         const { first_name, last_name, email, age } = req.body;
+
+        let nuevoCarrito = await cartManager.createCart();
 
         try {
             //Verificamos si ya existe un registro con ese email: 
@@ -37,7 +36,7 @@ const initializePassport = () => {
                 last_name,
                 email,
                 age,
-                password: createHash(password)
+                password: createHash(password), cart: nuevoCarrito
             }
 
             let resultado = await UsuarioModel.create(nuevoUsuario);
@@ -66,10 +65,7 @@ const initializePassport = () => {
             if (!isValidPassword(password, usuario)) {
                 return done(null, false);
             }
-
             return done(null, usuario);
-
-
         } catch (error) {
             return done(error);
         }
